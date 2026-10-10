@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* ── Brand (Indigo) ───────────────────────────────────────────────── */
+  --color-brand-50:  #eef2ff;
+  --color-brand-100: #e0e7ff;
+  --color-brand-200: #c7d2fe;
+  --color-brand-300: #a5b4fc;
+  --color-brand-400: #818cf8;
+  --color-brand-500: #6366f1;
+  --color-brand-600: #4f46e5;
+  --color-brand-700: #4338ca;
+  --color-brand-800: #3730a3;
+  --color-brand-900: #312e81;
+
+  /* ── Light surface palette ────────────────────────────────────────── */
+  --color-surface:   #f8fafc;   /* page bg  – slate-50  */
+  --color-surface-2: #ffffff;   /* cards    – white     */
+  --color-surface-3: #f1f5f9;   /* inputs, elevated rows – slate-100 */
+  --color-border:    #e2e8f0;   /* borders  – slate-200 */
+  --color-text-muted:#64748b;   /* secondary text – slate-500 */
+}
+
+/* ── Global base ──────────────────────────────────────────────────────── */
+body {
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 antialiased transition-colors duration-150;
+}
+
+/* ── Mermaid diagram resets ───────────────────────────────────────────── */
+.mermaid svg {
+  @apply w-full;
+}
+
+/* ── Scrollbar ────────────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 6px; height: 6px; }
+::-webkit-scrollbar-track    { background: transparent; }
+::-webkit-scrollbar-thumb    { @apply rounded-full bg-slate-300; }
+::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
+
+/* ── Print Media Styles ────────────────────────────────────────────────── */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 14mm 14mm 14mm 14mm;
+  }
+
+  /* Unoptimized dark mode print (Negative control: when print-mode fix is disabled) */
+  html.dark:not(.print-mode),
+  html.dark:not(.print-mode) body {
+    color-scheme: dark !important;
+    background-color: #0f172a !important;
+    background: #0f172a !important;
+    color: #f8fafc !important;
+  }
+
+  /* Optimized light print (With print fix: forces pristine light A4 document) */
+  :root,
+  html.print-mode,
+  html.print-mode body,
+  html:not(.dark),
+  html:not(.dark) body {
+    color-scheme: light !important;
+    background-color: #ffffff !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    font-size: 11pt !important;
+    line-height: 1.5 !important;
+  }
+
+  /* Force exact color reproduction for badges, priority highlights and charts */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Hide app chrome: sidebar, buttons, links, controls, toasts */
+  aside,
+  aside *,
+  .sidebar,
+  nav,
+  button,
+  .no-print,
+  .print-hide {
+    display: none !important;
+  }
+
+  /* Remove fixed/absolute screen constraints from AppLayout */
+  #root,
+  .app-layout,
+  main {
+    height: auto !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    display: block !important;
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Prevent awkward page cuts */
+  h1, h2, h3, h4, h5, h6 {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+    color: #0f172a !important;
+  }
+
+  /* Avoid break inside cards, diagrams, tables, and questions */
+  .print-break-inside-avoid,
+  .break-inside-avoid,
+  table,
+  tr,
+  figure,
+  .recharts-wrapper,
+  .mermaid {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  /* Flatten card chrome */
+  .rounded-2xl,
+  .rounded-xl {
+    border-radius: 6px !important;
+    border-color: #e2e8f0 !important;
+    background-color: #ffffff !important;
+  }
+
+  /* Tables wrap cleanly instead of running off page */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    table-layout: auto !important;
+  }
+
+  th, td {
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Pre and code blocks wrap without horizontal clipping */
+  pre, code {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+  }
+
+  /* Diagrams & Charts sizing in print */
+  .mermaid svg {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+
+  .recharts-responsive-container {
+    width: 100% !important;
+    max-width: 620px !important;
+    height: 260px !important;
+  }
+}
