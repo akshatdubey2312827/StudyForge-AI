@@ -2,8 +2,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GeminiNoteResponseSchema, type GeminiNoteResponse } from "../schemas/zod";
 import type { Difficulty } from "../models/Note";
 
+const DEFAULT_MODELS = [
+  "gemini-3.5-flash",
+  "gemini-3.5-flash-lite",
+  "gemini-3.8-flash",
+  "gemini-3.7-flash",
+];
+
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY!;
-const GEMINI_MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash-exp";
+const GEMINI_MODEL = process.env.GEMINI_MODEL ?? DEFAULT_MODELS[0];
 const GEMINI_TIMEOUT_MS = parseInt(process.env.GEMINI_TIMEOUT_MS ?? "30000", 10);
 
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -101,8 +108,6 @@ async function callWithTimeout<T>(
   ]);
 }
 
-const DEFAULT_MODELS = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.8-flash", "gemini-3.7-flash"];
-
 export async function generateNoteContent(
   topic: string,
   difficulty: Difficulty,
@@ -112,8 +117,8 @@ export async function generateNoteContent(
   const prompt = buildPrompt(sanitized, difficulty);
 
   const modelCandidates = [
-    process.env.GEMINI_MODEL || "gemini-3.5-flash",
-    ...DEFAULT_MODELS.filter((m) => m !== process.env.GEMINI_MODEL),
+    process.env.GEMINI_MODEL || DEFAULT_MODELS[0],
+    ...DEFAULT_MODELS.filter((m) => m !== (process.env.GEMINI_MODEL || DEFAULT_MODELS[0])),
   ];
 
   let lastError: Error | null = null;
