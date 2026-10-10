@@ -24,10 +24,10 @@
 
 ## ✨ Features
 
-- **Asynchronous AI Generation**: Generates notes using Google Gemini (`gemini-2.0-flash-exp`) in an isolated BullMQ background worker with automatic retry and timeout safety.
+- **Asynchronous AI Generation**: Generates notes using Google Gemini (`gemini-2.0-flash-exp` default, with automated multi-model candidate fallback including `gemini-3.5-flash` series) in an isolated BullMQ background worker with automatic retry and timeout safety.
 - **Interactive Visualizations**: Renders dynamic Mermaid diagrams (flowcharts, sequence diagrams, mind maps, entity relationship models) and Recharts metrics (bar, line, and pie charts).
 - **Print-Optimized PDF Export**: High-contrast, page-break-aware PDF export (`@media print`) that temporarily switches diagrams to light mode, awaits full SVG rendering, and flattens card chromes.
-- **Double-Entry Credit System**: Atomic credit reservations and releases backed by MongoDB multi-document transactions to prevent race conditions and over-allocation.
+- **Append-Only Credit Ledger**: Atomic credit reservations, spends, and refunds backed by MongoDB multi-document transactions where user balance is strictly the sum of immutable ledger entries (`balance = sum of ledger delta entries`).
 - **Billing & Stripe Integration**: Supports credit package purchases (Starter 50 cr, Pro 150 cr, Unlimited 500 cr in INR ₹) with idempotent Stripe webhook verification.
 - **Authentication**: JWT-based authentication using httpOnly access and refresh cookies, with Google OAuth 2.0 integration and automatic dev-mode simulation for local development.
 - **Class-Based Dark Mode**: Instant theme switching persisted in `localStorage` and synchronized with system preferences without contrast regressions.
@@ -154,9 +154,9 @@ studyforge-ai/
 | `STRIPE_PRICE_PRO` | Yes* | `price_...` | Stripe Price ID for Pro package (150 credits) |
 | `STRIPE_PRICE_UNLIMITED` | Yes* | `price_...` | Stripe Price ID for Unlimited package (500 credits) |
 | `GEMINI_API_KEY` | Yes* | `your_gemini_api_key` | Google AI Studio API key for Gemini models |
-| `GEMINI_MODEL` | No | `gemini-2.0-flash-exp` | Model identifier used for generative notes |
+| `GEMINI_MODEL` | No | `gemini-2.0-flash-exp` | Configurable model identifier for generative notes (falls back dynamically across candidate models) |
 | `GEMINI_TIMEOUT_MS` | No | `30000` | Request timeout for Gemini API calls in ms |
-| `CREDITS_PER_NOTE` | No | `2` | Number of credits required to generate a note |
+| `CREDITS_PER_NOTE` | No | `2` | Base credits required to generate a note (difficulty-scaled: easy = 1, medium = 2, hard = 3) |
 
 ---
 
