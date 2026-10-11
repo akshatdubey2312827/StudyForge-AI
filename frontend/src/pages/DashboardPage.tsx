@@ -4,7 +4,7 @@ import { BookOpen, Clock, Plus, Zap } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useCredits } from "@/hooks/useCredits";
 import { listNotes } from "@/api/notes";
-import { DIFFICULTY_CREDIT_COST, type Difficulty, type NoteSummary } from "@/types";
+import type { Difficulty, NoteSummary } from "@/types";
 import { generateNote } from "@/api/notes";
 import { Card, CardHeader, CardTitle } from "@/components/common/Card";
 import { Button } from "@/components/common/Button";
@@ -16,7 +16,7 @@ const DIFFICULTY_OPTIONS: Difficulty[] = ["easy", "medium", "hard"];
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const { credits, isLoading: creditsLoading, refresh: refreshCredits } = useCredits();
+  const { credits, isLoading: creditsLoading, refresh: refreshCredits, getCostForDifficulty } = useCredits();
   const navigate = useNavigate();
 
   const [topic, setTopic] = useState("");
@@ -143,7 +143,7 @@ export function DashboardPage() {
           <CardHeader>
             <CardTitle>Generate Notes</CardTitle>
             <span className="rounded-full bg-brand-50 dark:bg-brand-950/60 border border-brand-100 dark:border-brand-800/60 px-2.5 py-0.5 text-xs font-medium text-brand-700 dark:text-brand-300">
-              {DIFFICULTY_CREDIT_COST[difficulty]} {DIFFICULTY_CREDIT_COST[difficulty] === 1 ? "credit" : "credits"}
+              {getCostForDifficulty(difficulty)} {getCostForDifficulty(difficulty) === 1 ? "credit" : "credits"}
             </span>
           </CardHeader>
           <form onSubmit={handleGenerate} className="space-y-4">
@@ -179,7 +179,7 @@ export function DashboardPage() {
               >
                 {DIFFICULTY_OPTIONS.map((d) => (
                   <option key={d} value={d} className="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-                    {capitalize(d)} ({DIFFICULTY_CREDIT_COST[d]} {DIFFICULTY_CREDIT_COST[d] === 1 ? "credit" : "credits"})
+                    {capitalize(d)} ({getCostForDifficulty(d)} {getCostForDifficulty(d) === 1 ? "credit" : "credits"})
                   </option>
                 ))}
               </select>
@@ -193,7 +193,7 @@ export function DashboardPage() {
               isLoading={isGenerating}
               leftIcon={<Zap size={15} />}
             >
-              Generate Notes ({DIFFICULTY_CREDIT_COST[difficulty]} {DIFFICULTY_CREDIT_COST[difficulty] === 1 ? "credit" : "credits"})
+              Generate Notes ({getCostForDifficulty(difficulty)} {getCostForDifficulty(difficulty) === 1 ? "credit" : "credits"})
             </Button>
           </form>
         </Card>

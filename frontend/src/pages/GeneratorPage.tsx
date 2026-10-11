@@ -4,7 +4,7 @@ import { CheckCircle, XCircle, BookMarked, Eye, Clock, Download } from "lucide-r
 import { useJobStatus } from "@/hooks/useJobStatus";
 import { getNote } from "@/api/notes";
 import { generateNote } from "@/api/notes";
-import { DIFFICULTY_CREDIT_COST, type Difficulty, type Note } from "@/types";
+import type { Difficulty, Note } from "@/types";
 import { NoteViewer } from "@/components/notes/NoteViewer";
 import { Button } from "@/components/common/Button";
 import { useCredits } from "@/hooks/useCredits";
@@ -85,6 +85,7 @@ function GenerateForm({
   isLoading: boolean;
   error: string | null;
 }) {
+  const { getCostForDifficulty } = useCredits();
   const [topic, setTopic] = useState(defaultTopic);
   const [difficulty, setDifficulty] = useState<Difficulty>(defaultDifficulty);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -164,7 +165,7 @@ function GenerateForm({
               Difficulty
             </label>
             <span className="text-xs text-slate-400 dark:text-slate-400">
-              Cost: <strong className="text-slate-700 dark:text-slate-200">{DIFFICULTY_CREDIT_COST[difficulty]} {DIFFICULTY_CREDIT_COST[difficulty] === 1 ? "credit" : "credits"}</strong>
+              Cost: <strong className="text-slate-700 dark:text-slate-200">{getCostForDifficulty(difficulty)} {getCostForDifficulty(difficulty) === 1 ? "credit" : "credits"}</strong>
             </span>
           </div>
           <div className="flex gap-2">
@@ -185,7 +186,7 @@ function GenerateForm({
                 )}
               >
                 <span>{capitalize(d)}</span>
-                <span className="text-[11px] font-normal opacity-80">{DIFFICULTY_CREDIT_COST[d]} cr</span>
+                <span className="text-[11px] font-normal opacity-80">{getCostForDifficulty(d)} cr</span>
               </button>
             ))}
           </div>
@@ -196,7 +197,7 @@ function GenerateForm({
           size="lg"
           isLoading={isLoading}
         >
-          Generate Notes ({DIFFICULTY_CREDIT_COST[difficulty]} {DIFFICULTY_CREDIT_COST[difficulty] === 1 ? "credit" : "credits"})
+          Generate Notes ({getCostForDifficulty(difficulty)} {getCostForDifficulty(difficulty) === 1 ? "credit" : "credits"})
         </Button>
       </form>
     </div>

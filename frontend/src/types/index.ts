@@ -23,7 +23,12 @@ export interface CreditBalance {
 
 // ─── Notes ────────────────────────────────────────────────────────────────────
 export type Difficulty = "easy" | "medium" | "hard";
-export const DIFFICULTY_CREDIT_COST: Record<Difficulty, number> = {
+
+/**
+ * Fallback cost table used only during offline / initial render before
+ * GET /api/notes/costs resolves. Tested for strict contract parity with backend.
+ */
+export const FALLBACK_DIFFICULTY_COST: Record<Difficulty, number> = {
   easy: 1,
   medium: 2,
   hard: 3,

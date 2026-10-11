@@ -1,13 +1,16 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { getCreditBalance } from "@/api/billing";
+import { getNoteDifficultyCosts } from "@/api/notes";
 import { useAuth } from "@/hooks/useAuth";
-import type { CreditBalance } from "@/types";
+import { FALLBACK_DIFFICULTY_COST, type CreditBalance, type Difficulty } from "@/types";
 
 export interface CreditContextType {
   credits: CreditBalance | null;
+  costs: Record<Difficulty, number>;
   isLoading: boolean;
   error: string | null;
   refresh: () => Promise<void>;
+  getCostForDifficulty: (difficulty: Difficulty) => number;
 }
 
 const CreditContext = createContext<CreditContextType | undefined>(undefined);
@@ -15,9 +18,31 @@ const CreditContext = createContext<CreditContextType | undefined>(undefined);
 export function CreditProvider({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
   const [credits, setCredits] = useState<CreditBalance | null>(null);
+  const [costs, setCosts] = useState<Record<Difficulty, number>>(FALLBACK_DIFFICULTY_COST);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
+
+  // Fetch costs once from backend (cached single source of truth)
+  useEffect(() => {
+    let mounted = true;
+    getNoteDifficultyCosts()
+      .then((data) => {
+        if (mounted && data) {
+          setCosts({
+            easy: data.easy ?? FALLBACK_DIFFICULTY_COST.easy,
+            medium: data.medium ?? FALLBACK_DIFFICULTY_COST.medium,
+            hard: data.hard ?? FALLBACK_DIFFICULTY_COST.hard,
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn("[CreditContext] Failed to fetch dynamic costs, using fallback:", err);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const fetchCredits = useCallback(async () => {
     if (!isAuthenticated) {
@@ -42,6 +67,13 @@ export function CreditProvider({ children }: { children: React.ReactNode }) {
       setIsLoading(false);
     }
   }, [isAuthenticated]);
+
+  const getCostForDifficulty = useCallback(
+    (difficulty: Difficulty): number => {
+      return costs[difficulty] ?? FALLBACK_DIFFICULTY_COST[difficulty] ?? 2;
+    },
+    [costs],
+  );
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -72,7 +104,16 @@ export function CreditProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated, fetchCredits]);
 
   return (
-    <CreditContext.Provider value={{ credits, isLoading, error, refresh: fetchCredits }}>
+    <CreditContext.Provider
+      value={{
+        credits,
+        costs,
+        isLoading,
+        error,
+        refresh: fetchCredits,
+        getCostForDifficulty,
+      }}
+    >
       {children}
     </CreditContext.Provider>
   );

@@ -11,6 +11,15 @@ import type {
 } from "@/types";
 
 /**
+ * GET /api/notes/costs
+ * Single source of truth for difficulty costs.
+ */
+export async function getNoteDifficultyCosts(): Promise<Record<string, number>> {
+  const res = await apiClient.get<Record<string, number>>("/api/notes/costs");
+  return res.data;
+}
+
+/**
  * POST /api/notes/generate
  * Reserves credits and enqueues a note generation job.
  * Returns 202 with { job_id, note_id, status, estimated_seconds }.
