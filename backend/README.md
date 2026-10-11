@@ -132,7 +132,8 @@ All endpoints return JSON. Cookies are httpOnly.
 
 | Method | Path | Description |
 |--------|------|-------------|
-| `POST` | `/api/notes/generate` | Check balance → reserve credits → enqueue job |
+| `GET` | `/api/notes/costs` | Return difficulty credit cost table (`{ easy: 1, medium: 2, hard: 3 }`) |
+| `POST` | `/api/notes/generate` | Check balance → reserve credits by difficulty → enqueue job |
 | `GET` | `/api/notes` | List completed notes (paginated) |
 | `GET` | `/api/notes/:noteId` | Get full note with content, diagrams, questions |
 
@@ -183,18 +184,18 @@ Rate limit on `/generate`: **10 requests per 15 minutes** per user.
     └─────────────────────────────────┘
 ```
 
-### Credit Ledger Design
+### Append-Only Credit Ledger Design
 
 **Balance = `SUM(CreditLedger.delta)` for a userId — never a standalone counter.**
 
 | Event | `delta` | `reason` |
 |-------|---------|----------|
 | User buys Starter Pack | `+50` | `purchase` |
-| Note generation starts | `-2` | `reserve` |
+| Note generation starts | `-1`, `-2`, or `-3` (by difficulty) | `reserve` |
 | Note generation succeeds | *(reserve → `spend`)* | `spend` |
-| Note generation fails | `+2` | `refund` |
+| Note generation fails | `+1`, `+2`, or `+3` (restores reserve) | `refund` |
 
-The reserve entry prevents double-spending if two requests arrive simultaneously. On success it's updated to `spend`. On failure a positive `refund` entry restores the balance.
+The reserve entry prevents double-spending if two requests arrive simultaneously. On success it is updated to `spend`. On failure a positive `refund` entry matching the actual reserved amount restores the balance. If the worker completes after an early reconciler timeout, compensatory spend is applied.
 
 ### Security Model
 
@@ -214,19 +215,20 @@ backend/
 ├── src/
 │   ├── config/
 │   │   ├── db.ts              # MongoDB connection
-│   │   └── redis.ts           # Redis client factory
+│   │   └── redis.ts           # Redis client factory with fail-fast retry support
 │   ├── models/
 │   │   ├── User.ts
-│   │   ├── CreditLedger.ts    # Append-only ledger
+│   │   ├── CreditLedger.ts    # Append-only credit ledger
 │   │   ├── Transaction.ts     # Stripe transactions
 │   │   ├── Note.ts
 │   │   └── Job.ts             # BullMQ job tracking
 │   ├── schemas/
 │   │   └── zod.ts             # All Zod schemas incl. GeminiNoteResponseSchema
 │   ├── services/
-│   │   ├── credits.ts         # Ledger operations
-│   │   ├── gemini.ts          # Gemini API + sanitizer + retry
-│   │   └── stripe.ts          # Stripe client + checkout
+│   │   ├── credits.ts         # Ledger operations & difficulty cost table
+│   │   ├── gemini.ts          # Gemini API + model fallback + retry
+│   │   ├── stripe.ts          # Stripe client + checkout
+│   │   └── reconciliation.ts  # Orphaned reservation reconciliation cleaner
 │   ├── queues/
 │   │   └── noteQueue.ts       # BullMQ queue definition
 │   ├── middleware/
@@ -243,6 +245,8 @@ backend/
 │   ├── app.ts                 # Express app (routes, middleware)
 │   ├── server.ts              # HTTP server entry point
 │   └── worker.ts              # Worker process entry point
+├── tests/
+│   └── test-runner.ts         # Automated test suite (concurrency, idempotency, boundaries)
 ├── .env.example
 ├── package.json
 ├── tsconfig.json
