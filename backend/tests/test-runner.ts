@@ -355,10 +355,34 @@ async function main() {
   }
   console.log("================================================================================\n");
 
+  try {
+    const { getRedis } = await import("../src/config/redis");
+    const redis = getRedis();
+    await redis.quit().catch(() => {});
+  } catch {}
+
+  try {
+    await noteQueue.close().catch(() => {});
+  } catch {}
+
+  try {
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect().catch(() => {});
+    }
+  } catch {}
+
   process.exit(allTestsPassed ? 0 : 1);
 }
 
-main().catch((err) => {
+main().catch(async (err) => {
   console.error("Fatal test error:", err);
+  try {
+    const { getRedis } = await import("../src/config/redis");
+    await getRedis().quit().catch(() => {});
+    await noteQueue.close().catch(() => {});
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect().catch(() => {});
+    }
+  } catch {}
   process.exit(1);
 });

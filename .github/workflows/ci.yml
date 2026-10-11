@@ -10,6 +10,18 @@ jobs:
   backend:
     name: Backend (Type-check, Lint, Test & Build)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
 
     steps:
       - name: Checkout repository
@@ -22,6 +34,14 @@ jobs:
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
+      - name: Cache mongodb-memory-server binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/mongodb-binaries
+          key: ${{ runner.os }}-mongodb-binaries-6.0.19
+          restore-keys: |
+            ${ runner.os }}-mongodb-binaries-
+
       - name: Install backend dependencies
         run: npm ci
         working-directory: backend
@@ -33,10 +53,15 @@ jobs:
       - name: Run backend tests
         run: npm test
         working-directory: backend
+        env:
+          REDIS_URL: redis://localhost:6379
+          REDIS_MAX_RETRIES: "3"
+          MONGOMS_DOWNLOAD_DIR: ~/.cache/mongodb-binaries
 
   frontend:
     name: Frontend (Type-check & Build)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout repository

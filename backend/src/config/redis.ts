@@ -7,7 +7,13 @@ export const redisConnectionOptions: RedisOptions = {
   keepAlive: 10000,           // 10s TCP keep-alive
   connectTimeout: 10000,
   retryStrategy(times: number) {
-    // Exponential backoff capped at 3s — never gives up so transient interruptions recover
+    // If REDIS_MAX_RETRIES is set (e.g. during tests/CI), fail fast instead of retrying forever
+    const maxRetries = process.env.REDIS_MAX_RETRIES ? parseInt(process.env.REDIS_MAX_RETRIES, 10) : null;
+    if (maxRetries !== null && times > maxRetries) {
+      console.error(`[Redis] Failed to connect after ${times - 1} attempts (REDIS_MAX_RETRIES=${maxRetries} exceeded). Aborting.`);
+      return null; // Signals ioredis to stop retrying and emit error
+    }
+    // Exponential backoff capped at 3s — never gives up in production so transient interruptions recover
     const delay = Math.min(times * 200, 3000);
     console.warn(`[Redis] Connection attempt #${times} failed. Retrying in ${delay}ms...`);
     return delay;
