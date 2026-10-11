@@ -1,3 +1,5 @@
+process.env.REDIS_MAX_RETRIES = process.env.REDIS_MAX_RETRIES ?? "2";
+
 import "dotenv/config";
 import mongoose from "mongoose";
 import request from "supertest";
@@ -14,6 +16,7 @@ import { noteQueue } from "../src/queues/noteQueue";
 import { stripe } from "../src/services/stripe";
 import { getBalance, getCreditCost, confirmSpend, addLedgerEntry, refundReserve } from "../src/services/credits";
 import * as geminiService from "../src/services/gemini";
+import { getRedis } from "../src/config/redis";
 
 const TEST_WEBHOOK_SECRET = "whsec_test_secret_for_idempotency_validation_123";
 process.env.STRIPE_WEBHOOK_SECRET = TEST_WEBHOOK_SECRET;
@@ -24,6 +27,18 @@ async function main() {
   console.log("\n================================================================================");
   console.log("  STUDYFORGE AI — PERMANENT AUTOMATED TEST SUITE");
   console.log("================================================================================\n");
+
+  // Verify Redis connectivity at test startup
+  const redisUrl = process.env.REDIS_URL ?? "redis://127.0.0.1:6380";
+  try {
+    const redis = getRedis();
+    await redis.ping();
+    console.log(`>>> [PASS] Redis connected successfully (${redisUrl})\n`);
+  } catch (err: any) {
+    console.error(`\n>>> [FAIL] Redis connection failed: Cannot reach Redis at ${redisUrl}.`);
+    console.error(`    Ensure Redis is running or specify a valid REDIS_URL. Details: ${err.message}\n`);
+    process.exit(1);
+  }
 
   let allTestsPassed = true;
 
