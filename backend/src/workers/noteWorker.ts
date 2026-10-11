@@ -2,7 +2,7 @@ import "dotenv/config";
 import { Worker, type Job as BullJob } from "bullmq";
 import { connectDB } from "../config/db";
 import { createRedisClient } from "../config/redis";
-import { generateNoteContent } from "../services/gemini";
+import * as geminiService from "../services/gemini";
 import { confirmSpend, refundReserve, getCreditCost } from "../services/credits";
 import { Note } from "../models/Note";
 import { Job } from "../models/Job";
@@ -31,7 +31,7 @@ async function processNoteJob(bullJob: BullJob<IJobPayload>): Promise<void> {
   // ── Step 1: Call Gemini API (with timeout + up to 2 internal retries) ───────
   let geminiResponse;
   try {
-    geminiResponse = await generateNoteContent(topic, difficulty as "easy" | "medium" | "hard");
+    geminiResponse = await geminiService.generateNoteContent(topic, difficulty as "easy" | "medium" | "hard");
   } catch (geminiErr) {
     const errorMsg = geminiErr instanceof Error ? geminiErr.message : "Gemini error";
     console.error(`[Worker] Gemini failed for job ${bullJob.id}:`, errorMsg);

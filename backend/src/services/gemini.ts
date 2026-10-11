@@ -108,11 +108,21 @@ async function callWithTimeout<T>(
   ]);
 }
 
+let testGeneratorOverride: ((topic: string, diff: Difficulty) => Promise<GeminiNoteResponse>) | null = null;
+
+export function __setTestGeneratorOverride(fn: typeof testGeneratorOverride) {
+  testGeneratorOverride = fn;
+}
+
 export async function generateNoteContent(
   topic: string,
   difficulty: Difficulty,
   maxRetries = 2,
 ): Promise<GeminiNoteResponse> {
+  if (testGeneratorOverride) {
+    return testGeneratorOverride(topic, difficulty);
+  }
+
   const sanitized = sanitizeTopic(topic);
   const prompt = buildPrompt(sanitized, difficulty);
 

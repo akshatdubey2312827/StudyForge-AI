@@ -178,9 +178,20 @@ export async function confirmSpend(
   ledgerEntryId: string,
   jobId?: string,
   userId?: Types.ObjectId | string,
-  amount = 2,
+  amount?: number,
 ): Promise<void> {
-  // 1. Check if a refund was already created for this job
+  // 1. Resolve actual amount: if not explicitly supplied, check the reserve entry's delta
+  let resolvedAmount = amount;
+  if (resolvedAmount === undefined) {
+    const reserveEntry = await CreditLedger.findById(ledgerEntryId);
+    if (reserveEntry) {
+      resolvedAmount = Math.abs(reserveEntry.delta);
+    } else {
+      resolvedAmount = 2; // fallback if reserve entry not found
+    }
+  }
+
+  // 2. Check if a refund was already created for this job
   if (jobId && userId) {
     const existingRefund = await CreditLedger.findOne({
       userId: typeof userId === "string" ? new Types.ObjectId(userId) : userId,
@@ -191,14 +202,14 @@ export async function confirmSpend(
     if (existingRefund) {
       // Reconciler refunded prematurely; deduct the spend so user is correctly charged for the delivered note
       console.warn(
-        `[Credits] Job ${jobId} completed after reconciler refunded it. Applying compensatory spend.`,
+        `[Credits] Job ${jobId} completed after reconciler refunded it. Applying compensatory spend of ${resolvedAmount} cr.`,
       );
-      await addLedgerEntry(userId, -amount, "spend", jobId);
+      await addLedgerEntry(userId, -resolvedAmount, "spend", jobId);
       return;
     }
   }
 
-  // 2. Atomically convert reserve -> spend
+  // 3. Atomically convert reserve -> spend
   await CreditLedger.findOneAndUpdate(
     { _id: new Types.ObjectId(ledgerEntryId), reason: "reserve" },
     { reason: "spend" },

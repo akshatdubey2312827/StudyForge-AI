@@ -59,7 +59,8 @@ export async function reconcileOrphanedReservations(
         if (job.payload?.noteId) {
           const note = await Note.findById(job.payload.noteId);
           if (note && note.status === "complete") {
-            await confirmSpend(reserve._id.toString(), job._id.toString(), reserve.userId);
+            const cost = Math.abs(reserve.delta);
+            await confirmSpend(reserve._id.toString(), job._id.toString(), reserve.userId, cost);
             await Job.findByIdAndUpdate(job._id, { status: "complete" });
             resolvedToSpend++;
             console.log(

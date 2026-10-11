@@ -226,11 +226,40 @@ async function main() {
     console.log("\n>>> TEST 2 RESULT: FAILED ❌\n");
   }
 
+  // =========================================================================
+  // TEST 3: Difficulty Cost Table Contract & Parity Verification
+  // =========================================================================
+  console.log("-------------------------------------------------------");
+  console.log("TEST 3 — Difficulty Cost Table Contract Parity");
+  console.log("-------------------------------------------------------");
+
+  const backendCostsRes = await request(app).get("/api/notes/costs");
+  const backendCosts = backendCostsRes.body;
+  console.log("[Test 3] Backend /api/notes/costs response:", backendCosts);
+
+  // Expected canonical table
+  const expectedCosts: Record<string, number> = { easy: 1, medium: 2, hard: 3 };
+  const costMatch =
+    backendCosts.easy === expectedCosts.easy &&
+    backendCosts.medium === expectedCosts.medium &&
+    backendCosts.hard === expectedCosts.hard;
+
+  console.log(`[Test 3] Cost parity check (Easy: 1, Medium: 2, Hard: 3): ${costMatch ? "MATCH" : "MISMATCH"}`);
+
+  const test3Passed = backendCostsRes.status === 200 && costMatch;
+  if (test3Passed) {
+    console.log("\n>>> TEST 3 RESULT: PASSED ✅ (Backend cost API matches difficulty pricing contract)\n");
+  } else {
+    console.log("\n>>> TEST 3 RESULT: FAILED ❌\n");
+  }
+
+  const allPassed = test1Passed && test2Passed && test3Passed;
+
   console.log("=======================================================");
-  console.log(`  SUMMARY: ${test1Passed && test2Passed ? "BOTH TESTS PASSED ✅" : "TESTS FAILED ❌"}`);
+  console.log(`  SUMMARY: ${allPassed ? "ALL 3 TESTS PASSED ✅" : "TESTS FAILED ❌"}`);
   console.log("=======================================================\n");
 
-  process.exit(test1Passed && test2Passed ? 0 : 1);
+  process.exit(allPassed ? 0 : 1);
 }
 
 main();

@@ -12,6 +12,15 @@ import mongoose from "mongoose";
 
 const router = Router();
 
+// ─── GET /api/notes/costs ─────────────────────────────────────────────────────
+router.get("/costs", (_req, res) => {
+  res.json({
+    easy: 1,
+    medium: 2,
+    hard: 3,
+  });
+});
+
 // ─── POST /api/notes/generate ─────────────────────────────────────────────────
 router.post(
   "/generate",
