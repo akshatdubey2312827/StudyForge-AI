@@ -2,7 +2,7 @@
 
 > Production-grade, full-stack AI revision platform that generates high-yield exam notes, interactive diagrams, practice questions, and print-optimized PDF exports with an append-only credit ledger.
 
-[![CI](https://github.com/placeholder-user/studyforge-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/placeholder-user/studyforge-ai/actions/workflows/ci.yml)
+[![CI](https://github.com/akshatdubey2312827/StudyForge-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/akshatdubey2312827/StudyForge-AI/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.6%20%7C%206.0-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
@@ -217,7 +217,7 @@ studyforge-ai/
 Clone the repository and install dependencies:
 
 ```bash
-git clone https://github.com/placeholder-user/studyforge-ai.git
+git clone https://github.com/akshatdubey2312827/StudyForge-AI.git
 cd studyforge-ai
 
 # Install backend dependencies
@@ -309,7 +309,7 @@ cd frontend && npm run build && cd ..
 ## 👤 Author
 
 **Akshat Dubey**
-- GitHub: [@placeholder-user](https://github.com/placeholder-user)
+- GitHub: [@akshatdubey2312827](https://github.com/akshatdubey2312827)
 - LinkedIn: `[YOUR_LINKEDIN_URL_HERE]`
 
 ---
