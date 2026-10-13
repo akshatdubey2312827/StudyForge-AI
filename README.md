@@ -310,7 +310,7 @@ cd frontend && npm run build && cd ..
 
 **Akshat Dubey**
 - GitHub: [@akshatdubey2312827](https://github.com/akshatdubey2312827)
-- LinkedIn: `https://www.linkedin.com/in/akshatdubeyofficial17`
+- LinkedIn: [akshatdubeyofficial17](https://www.linkedin.com/in/akshatdubeyofficial17)
 
 ---
 
