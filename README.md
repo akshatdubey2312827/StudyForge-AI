@@ -25,7 +25,6 @@ The platform is engineered around financial-grade reliability: an **append-only 
 
 ## 🚀 Live Demo
 
-- **Web Application**: `[YOUR_LIVE_DEMO_URL_HERE]` *(e.g., https://studyforge-ai.vercel.app)*
 - **API Health Endpoint**: `http://localhost:3001/health`
 
 ---
